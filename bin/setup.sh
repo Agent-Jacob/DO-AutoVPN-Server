@@ -21,8 +21,10 @@ echo $DO_APIKEY > /root/.do_apikey
 # Install required packages for python
 apt-get install -qy python python-openssl 
 
+SERVER_IP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+
 # Setup key for Python Client
-openssl req -new -x509 -keyout py-server.pem -out py-server.pem -days 365 -subj /CN=Python-Server/ -nodes
+openssl req -new -x509 -keyout py-server.pem -out py-server.pem -days 365 -subj /CN=$SERVER_IP/ -nodes
 
 # Setup OpenVPN
 chmod +x ./openvpn.sh && ./openvpn.sh
