@@ -31,26 +31,22 @@ class SecureHTTPServer(HTTPServer):
 
 class SecureAuthHandler(SimpleHTTPRequestHandler):
 	def setup(self):
-		print "In setup"
 		self.connection = self.request
 		self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
 		self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
 		
 	def do_HEAD(self):
-		print "In do_HEAD"
 		self.send_response(200)
 		self.send_header('Content-type', 'text/html')
 		self.end_headers()
 
 	def do_AUTHHEAD(self):
-		print "In do_AUTHHEAD"
 		self.send_response(401)
 		self.send_header('WWW-Authenticate', 'Basic realm=\"Authorized Access Only!\"')
 		self.send_header('Content-type', 'text/html')
 		self.end_headers()
 
 	def do_GET(self):
-		print "In do_GET"
 		global key
 		if self.headers.getheader('Authorization') == None:
 			self.do_AUTHHEAD()
@@ -67,7 +63,7 @@ class SecureAuthHandler(SimpleHTTPRequestHandler):
 			
 		# Once we get the file, terminate the server
 		path = self.path
-		if 'client.opvn' in path:
+		if '.opvn' in path:
 			print 'Client Config was downloaded, terminating...'
 			exit()
 			

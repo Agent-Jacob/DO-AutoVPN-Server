@@ -11,8 +11,9 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-# Set our auth PW (used later)
-AUTH_PW = $1
+# Set our env settings (these are randomly sent to us vi the meta info)
+HTTPS_PORT=$1
+AUTH_PW=$2
 
 # Install required packages for python
 apt-get install -qy python python-openssl 
@@ -27,6 +28,6 @@ chmod +x ./openvpn.sh && ./openvpn.sh
 cp /etc/openvpn/client.ovpn ./client.ovpn
 
 # Serve up the HTTPS server
-./handoff-server.py 1221 admin:$AUTH_PW
+./handoff-server.py $HTTPS_PORT admin:$AUTH_PW
 
 # Config is downloaded, we are good to go!
