@@ -3,7 +3,6 @@
 # DO-AutoVPN Droplet Setup Script
 # By: Chris Blake (chrisrblake@gmail.com)
 #
-set -e
 
 # Are we root?
 if [[ $EUID -ne 0 ]]; then
