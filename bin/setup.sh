@@ -30,12 +30,12 @@ chmod +x ./openvpn.sh && ./openvpn.sh
 # Copy over the client config
 cp /etc/openvpn/client.ovpn ./client.ovpn
 
-# Serve up the HTTPS server
-./handoff-server.py $HTTPS_PORT admin:$AUTH_PW
-
-# Config is downloaded, startup the self destruct script
+# Startup the self destruct script
 cp ./remove-instance.sh /usr/bin/remove-instance.sh && chmod +x /usr/bin/remove-instance.sh
 /usr/bin/remove-instance.sh &
+
+# Serve up the HTTPS server so the config can be pulled
+./handoff-server.py $HTTPS_PORT admin:$AUTH_PW
 
 # Finish
 echo "setup.sh Complete!"
