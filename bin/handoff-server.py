@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 #
 # By Chris Blake (chrisrblake@gmail.com)
+# Simple HTTPS Server with Authentication
 #
 
-import socket, os
+import base64, os, socket, sys
 from SocketServer import BaseServer
 from BaseHTTPServer import HTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
 from OpenSSL import SSL
-import sys
-import base64
 
 key = ""
 
@@ -28,13 +27,13 @@ class SecureHTTPServer(HTTPServer):
 
 	def shutdown_request(self,request):
 		request.shutdown()
-
+			
 class SecureAuthHandler(SimpleHTTPRequestHandler):
 	def setup(self):
 		self.connection = self.request
 		self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
 		self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
-		
+
 	def do_HEAD(self):
 		self.send_response(200)
 		self.send_header('Content-type', 'text/html')
@@ -54,25 +53,29 @@ class SecureAuthHandler(SimpleHTTPRequestHandler):
 			pass
 		elif self.headers.getheader('Authorization') == 'Basic '+key:
 			SimpleHTTPRequestHandler.do_GET(self)
-			pass
+			# Once we get the file, terminate the server
+			path = self.path
+			if 'client.ovpn' in path:
+				print 'Client Config was downloaded!'
+				self.server.socket.close() # dirty, but works! :D
+			else:
+				pass
 		else:
 			self.do_AUTHHEAD()
 			self.wfile.write(self.headers.getheader('Authorization'))
 			self.wfile.write('not authenticated')
 			pass
 			
-		# Once we get the file, terminate the server
-		path = self.path
-		if '.opvn' in path:
-			print 'Client Config was downloaded, terminating...'
-			exit()
-			
 def test(port):
-	server_address = ('', port)
-	httpd = SecureHTTPServer(server_address, SecureAuthHandler)
-	sa = httpd.socket.getsockname()
-	print "Serving HTTPS on", sa[0], "port", sa[1], "..."
-	httpd.serve_forever()
+	try:
+		server_address = ('', port)
+		httpd = SecureHTTPServer(server_address, SecureAuthHandler)
+		sa = httpd.socket.getsockname()
+		print "Serving HTTPS on", sa[0], "port", sa[1], "..."
+		httpd.serve_forever()
+		
+	except (KeyboardInterrupt, SystemExit):
+		httpd.socket.close()
 
 if __name__ == '__main__':
 	if len(sys.argv)<3:
