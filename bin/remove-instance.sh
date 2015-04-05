@@ -3,7 +3,7 @@
 # By Chris Blake (chrisrblake@gmail.com)
 # Digital Ocean instance remove script
 #
-exec > >(tee /root/terminate.log)
+exec > >(tee tee /var/log/DO-AutoVPN/terminate.log)
 exec 2>&1
 
 DO_TOKEN=$(cat /root/.do_apikey)
