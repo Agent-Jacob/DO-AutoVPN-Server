@@ -70,6 +70,9 @@ comp-lzo    yes
 push        "dhcp-option DNS 8.8.8.8"
 push        "dhcp-option DNS 8.8.4.4"
 
+# Enable management so we can watch local connected clients
+management localhost 7505
+
 # Normally, the following command is sufficient.
 # However, it doesn't assign a gateway when using 
 # VMware guest-only networking.
