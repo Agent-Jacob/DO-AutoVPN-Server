@@ -24,25 +24,29 @@ apt-get install -qy openvpn curl iptables-persistent
 cd /etc/openvpn
 
 # Certificate Authority
->ca-key.pem      openssl genrsa 2048
+>ca-key.pem      openssl genrsa 4096
 >ca-csr.pem      openssl req -new -key ca-key.pem -subj /CN=OpenVPN-CA/
 >ca-cert.pem     openssl x509 -req -in ca-csr.pem -signkey ca-key.pem -days 365
 >ca-cert.srl     echo 01
 
 # Server Key & Certificate
->server-key.pem  openssl genrsa 2048
+>server-key.pem  openssl genrsa 4096
 >server-csr.pem  openssl req -new -key server-key.pem -subj /CN=OpenVPN-Server/
 >server-cert.pem openssl x509 -req -in server-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -days 365
 
 # Client Key & Certificate
->client-key.pem  openssl genrsa 2048
+>client-key.pem  openssl genrsa 4096
 >client-csr.pem  openssl req -new -key client-key.pem -subj /CN=OpenVPN-Client/
 >client-cert.pem openssl x509 -req -in client-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -days 365
 
 # Diffie hellman parameters
->dh.pem     openssl dhparam 2048
+>dh.pem     openssl dhparam 4096
 
 chmod 600 *-key.pem
+
+#Generate TLS auth key
+>tls.key openvpn --genkey --secret 
+
 
 # Set up IP forwarding and NAT for iptables
 >>/etc/sysctl.conf echo net.ipv4.ip_forward=1
@@ -63,6 +67,7 @@ key         server-key.pem
 ca          ca-cert.pem
 cert        server-cert.pem
 dh          dh.pem
+tls-auth tls.key 0
 keepalive   10 120
 persist-key yes
 persist-tun yes
@@ -98,6 +103,7 @@ nobind
 dev tun
 redirect-gateway def1 bypass-dhcp
 remote $SERVER_IP 443 tcp
+tls-auth tls.key 1
 comp-lzo yes
 
 <key>
